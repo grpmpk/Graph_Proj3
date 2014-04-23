@@ -1,0 +1,17 @@
+﻿Build started 4/23/2014 4:58:33 PM.
+     1>Project "C:\Users\msaydin\Downloads\gl4_exMS\gl4_example2\opengl4.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\opengl4.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+       Link:
+         All outputs are up-to-date.
+         opengl4.vcxproj -> C:\Users\msaydin\Downloads\gl4_exMS\gl4_example2\Debug\opengl4.exe
+       FinalizeBuildStatus:
+         Deleting file "Debug\opengl4.unsuccessfulbuild".
+         Touching "Debug\opengl4.lastbuildstate".
+     1>Done Building Project "C:\Users\msaydin\Downloads\gl4_exMS\gl4_example2\opengl4.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.04
