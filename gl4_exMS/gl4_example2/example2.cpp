@@ -33,21 +33,33 @@ typedef struct
 	float RGBA[4];
 } Vertex;
 
+enum CubicType { Serpentine, Cusp, Loop, Quadratic, Line, Point };
+
 class CubicSpline {
 	glm::vec3 _vertices[4];
 	float _d1;
 	float _d2;
 	float _d3;
-	float _discr;
+    float _discr;
+	CubicType _type;
+	float _kFunc[4];
+	float _lFunc[4];
+	float _mFunc[4];
+
+	float _ls;
+	float _lt;
+	float _ms;
+	float _mt;
+
 	void CalculateDs();
+	void SetType();
+	void CalculateLs();
+	void CalculateMs();
+	void CalculateFunctionals();
 public:
 	CubicSpline();
 	CubicSpline(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3);
 	CubicSpline(glm::vec3, glm::vec3, glm::vec3, glm::vec3);
-	float D1();
-	float D2();
-	float D3();
-	float Discr();
 };
 
 // default ctor
@@ -68,17 +80,25 @@ CubicSpline::CubicSpline(double x0, double y0, double x1, double y1, double x2, 
 	_vertices[3] = b3;
 
 	CalculateDs();
+	SetType();
+	CalculateLs();
+	CalculateMs();
+	CalculateFunctionals();
 }
 
-CubicSpline::CubicSpline(glm::vec3 b0, glm::vec3 b1, glm::vec3 b2, glm::vec3 b3)
-{
-	_vertices[0] = b0;
-	_vertices[1] = b1;
-	_vertices[2] = b2;
-	_vertices[3] = b3;
-
-	CalculateDs();
-}
+//CubicSpline::CubicSpline(glm::vec3 b0, glm::vec3 b1, glm::vec3 b2, glm::vec3 b3)
+//{
+//	_vertices[0] = b0;
+//	_vertices[1] = b1;
+//	_vertices[2] = b2;
+//	_vertices[3] = b3;
+//
+//	CalculateDs();
+//	SetType();
+//	CalculateLs();
+//	CalculateMs();
+//	CalculateFunctionals();
+//}
 
 void CubicSpline::CalculateDs()
 {
@@ -92,22 +112,101 @@ void CubicSpline::CalculateDs()
 	_discr = _d1*_d1 *(3*_d2*_d2 - 4 * _d1 * _d3);
 }
 
-float CubicSpline::D1()
+void CubicSpline::SetType()
 {
-	return _d1;
+	if (_vertices[0] == _vertices[1] && _vertices[1] == _vertices[2] && _vertices[2] == _vertices[3])
+	{
+		_type = Point;
+	}
+	else if (_d1 == _d2 && _d2 == _d3 && _d3 == 0)
+	{
+		_type = Line;
+	}
+	else if (_d1 == _d2 && _d2 == _d3 && _d3 != 0)
+	{
+		_type = Quadratic;
+	}
+	else if (_discr < 0.0)
+	{
+		_type = Serpentine;
+	}
+	else if (_discr == 0.0)
+	{
+		_type = Cusp;
+	}
+	else if (_discr > 0.0)
+	{
+		_type = Loop;
+	}
 }
-float CubicSpline::D2()
+
+void CubicSpline::CalculateLs()
 {
-	return _d2;
+	switch (_type)
+	{
+		case Serpentine:
+			_ls = 3.0*_d2 - sqrt((9.0*pow(_d2,2)-12.0*_d1*_d3));
+			_lt = 6.0*_d1;
+			break;
+		case Cusp:
+				// TODO: set _ls and _lt
+			break;
+		case Loop:
+				// TODO: set _ls and _lt
+			break;
+		case Quadratic:
+				// TODO: set _ls and _lt
+			break;
+		default:
+			break;
+	}
 }
-float CubicSpline::D3()
+void CubicSpline::CalculateMs()
 {
-	return _d3;
+	switch (_type)
+	{
+		case Serpentine:
+			_ms = 3.0*_d2 - sqrt((9.0*pow(_d2,2)-12.0*_d1*_d3));
+			_mt = 6.0*_d1;
+			break;
+		case Cusp:
+			// TODO: set _ms and _mt
+			break;
+		case Loop:
+			// TODO: set _ms and _mt
+			break;
+		case Quadratic:
+			// TODO: set _ms and _mt
+			break;
+		default:
+			break;
+	}
 }
-float CubicSpline::Discr()
+
+void CubicSpline::CalculateFunctionals()
 {
-	return _discr;
+	switch (_type)
+	{
+		case Serpentine:
+				_kFunc[0] = _ls*_ms;
+				// TODO: set _kFunc[1-4], _lFunc[0-4] and _mFunc[0-4]
+				// test
+			break;
+		case Cusp:
+				// TODO: set _kFunc[0-4], _lFunc[0-4] and _mFunc[0-4]
+			break;
+		case Loop:
+				// TODO: set _kFunc[0-4], _lFunc[0-4] and _mFunc[0-4]
+			break;
+		case Quadratic:
+				// TODO: set _kFunc[0-4], _lFunc[0-4] and _mFunc[0-4]
+			break;
+		default:
+			break;
+	}
 }
+
+
 
 int CurrentWidth = 600,
 	CurrentHeight = 600,
@@ -174,15 +273,7 @@ void loadSvg(){
 				float* p = &path->pts[i*2];
 				CubicSpline tempSpline(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
 				splines.push_back(tempSpline);
-
-
-				for(int i = 0; i < splines.size() ; i++){
-					cout << splines[i].Discr() << endl;
-					//cout << splines[i].D1() << " " << splines[i].D2() << " " << splines[i].D3()<< endl;
-				}
-
-
-				//cout <<" Bezer ctrl pts:" << p[0]<< " " << p[1]<< " " <<  p[2]<< " " << p[3]<< " " <<  p[4]<< " " << p[5]<< " " <<  p[6]<< " " << p[7] << endl;
+				cout <<" Bezer ctrl pts:" << p[0]<< " " << p[1]<< " " <<  p[2]<< " " << p[3]<< " " <<  p[4]<< " " << p[5]<< " " <<  p[6]<< " " << p[7] << endl;
 				//drawCubicBez(p[0],p[1], p[2],p[3], p[4],p[5], p[6],p[7]);
 			}
 		}
