@@ -2,7 +2,7 @@
 
 #version 400
 
-layout(vertices = 3) out;
+layout(vertices = 4) out;
 in vec4 vPosition[];
 in vec4 vColor[];
 out vec3 tcPosition[];

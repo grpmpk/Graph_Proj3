@@ -1,7 +1,9 @@
 // Tessellation Evaluation Shader
 #version 400
 
-layout(triangles, equal_spacing, cw) in;
+//layout(triangles, equal_spacing, cw) in;
+layout(isolines) in;
+
 //layout(isolines) in;
 in vec3 tcPosition[];
 in vec4 tcColor[];
@@ -9,12 +11,16 @@ in vec4 tcColor[];
 out vec3 tePosition;
 out vec4 teColor;
 
+// using decasteljau
+out float k;
+out float l;
+out float m;
+
 uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 
 uniform int displacement;
-
 
 void main()
 {

@@ -36,6 +36,9 @@ typedef struct
 enum CubicType { Serpentine, Cusp, Loop, Quadratic, Line, Point };
 
 class CubicSpline {
+
+public:
+
 	glm::vec3 _vertices[4];
 	float _d1;
 	float _d2;
@@ -56,7 +59,7 @@ class CubicSpline {
 	void CalculateLs();
 	void CalculateMs();
 	void CalculateFunctionals();
-public:
+
 	CubicSpline();
 	CubicSpline(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3);
 	CubicSpline(glm::vec3, glm::vec3, glm::vec3, glm::vec3);
@@ -110,6 +113,8 @@ void CubicSpline::CalculateDs()
 	_d3 = 3*a3;
 
 	_discr = _d1*_d1 *(3*_d2*_d2 - 4 * _d1 * _d3);
+
+
 }
 
 void CubicSpline::SetType()
@@ -126,7 +131,7 @@ void CubicSpline::SetType()
 	{
 		_type = Quadratic;
 	}
-	else if (_discr < 0.0)
+	else if (_discr > 0.0)
 	{
 		_type = Serpentine;
 	}
@@ -134,7 +139,7 @@ void CubicSpline::SetType()
 	{
 		_type = Cusp;
 	}
-	else if (_discr > 0.0)
+	else if (_discr < 0.0)
 	{
 		_type = Loop;
 	}
@@ -300,6 +305,12 @@ void loadSvg(){
 
 int main(int argc, char* argv[])
 {
+
+
+	CubicSpline tempSpline(0.0f, 0.0f, 0.33f, 0.25f, 0.66f, 0.75f, 1.0f, 1.0f);
+	//cout <<" Bezer ctrl pts:" << p[0]<< " " << p[1]<< " " <<  p[2]<< " " << p[3]<< " " <<  p[4]<< " " << p[5]<< " " <<  p[6]<< " " << p[7] << endl;
+
+
 	loadSvg();
 	Initialize(argc, argv);
 
@@ -485,17 +496,19 @@ void CreateVBO(void)
 {
 	Vertex Vertices[] =
 	{
-		{ {  1.0f,  1.0f, -1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } }, // 0
-		{ { -1.0f,  1.0f,  1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } }, // 1
-		{ {  1.0f, -1.0f,  1.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }, // 2
-		{ { -1.0f, -1.0f, -1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 3
+		{ {  0.0,   0.0f, 0.0f, 1.0f },  { 1.0f, 1.0f, 1.0f, 1.0f } }, // 0
+		{ {  0.33f, 0.25f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 1
+		{ {  0.66f, 0.75f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 2
+		{ {  1.0f, 1.0f, 0.0f, 1.0f },   { 1.0f, 1.0f, 1.0f, 1.0f } }, // 3
+
+		//{ {  270.234, 380.754, 1.0, 1.0f },  { 1.0f, 1.0f, 1.0f, 1.0f } }, // 0
+		//{ {  270.879f, 382.582f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 1
+		//{ {  271.523f, 384.411f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 2
+		//{ {  272.168f, 386.239f, 1.0f, 1.0f },   { 1.0f, 1.0f, 1.0f, 1.0f } }, // 3
 	};
 
 	GLubyte Indices[] = {
-		0, 1, 2,
-        1, 3, 2,
-        0, 2, 3,
-        0, 3, 1,
+		0, 1, 2, 3
 	};
 
 
