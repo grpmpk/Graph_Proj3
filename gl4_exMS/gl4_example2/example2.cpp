@@ -48,6 +48,7 @@ public:
 	float _kFunc[4];
 	float _lFunc[4];
 	float _mFunc[4];
+	glm::mat4 KLM;
 
 	float _ls;
 	float _lt;
@@ -59,6 +60,7 @@ public:
 	void CalculateLs();
 	void CalculateMs();
 	void CalculateFunctionals();
+	void CreateKLM();
 
 	CubicSpline();
 	CubicSpline(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3);
@@ -87,6 +89,7 @@ CubicSpline::CubicSpline(double x0, double y0, double x1, double y1, double x2, 
 	CalculateLs();
 	CalculateMs();
 	CalculateFunctionals();
+	CreateKLM();
 }
 
 //CubicSpline::CubicSpline(glm::vec3 b0, glm::vec3 b1, glm::vec3 b2, glm::vec3 b3)
@@ -223,7 +226,30 @@ void CubicSpline::CalculateFunctionals()
 			break;
 	}
 }
+void CubicSpline::CreateKLM(){
+	KLM = glm::mat4(1.0);
+	KLM[0].x = _kFunc[0];
+	KLM[0].y = _lFunc[0];
+	KLM[0].z = _mFunc[0];
+	
+	KLM[1].x = _kFunc[1];
+	KLM[1].y = _lFunc[1];
+	KLM[1].z = _mFunc[1];
 
+	
+	KLM[2].x = _kFunc[2];
+	KLM[2].y = _lFunc[2];
+	KLM[2].z = _mFunc[2];
+	
+	KLM[3].x = _kFunc[3];
+	KLM[3].y = _lFunc[3];
+	KLM[3].z = _mFunc[3];
+
+
+	//KLM[0] = glm::vec4(_kFunc[0], _kFunc[1], _kFunc[2], _kFunc[3]);
+	//KLM[1] = glm::vec4(_lFunc[0], _lFunc[1], _lFunc[2], _lFunc[3]);
+	//KLM[2] = glm::vec4(_mFunc[0], _mFunc[1], _mFunc[2], _mFunc[3]);
+}
 
 
 int CurrentWidth = 600,
@@ -238,6 +264,10 @@ float TessLevelOuter = 1.0f;
 glm::mat4 ModelMatrix;
 glm::mat4 ViewMatrix;
 glm::mat4 ProjectionMatrix;
+
+
+glm::mat4 globalKlm;
+GLuint klmLocation;
 
 vector<CubicSpline> splines;
 
@@ -305,10 +335,6 @@ void loadSvg(){
 
 int main(int argc, char* argv[])
 {
-
-
-	CubicSpline tempSpline(0.0f, 0.0f, 0.33f, 0.25f, 0.66f, 0.75f, 1.0f, 1.0f);
-	//cout <<" Bezer ctrl pts:" << p[0]<< " " << p[1]<< " " <<  p[2]<< " " << p[3]<< " " <<  p[4]<< " " << p[5]<< " " <<  p[6]<< " " << p[7] << endl;
 
 
 	loadSvg();
@@ -456,6 +482,12 @@ void RenderFunction(void)
 	glUniformMatrix4fv(ViewMatrixLocation, 1, GL_FALSE, &(ViewMatrix[0][0]));
 	glUniformMatrix4fv(ProjectionMatrixLocation, 1, GL_FALSE, &(ProjectionMatrix[0][0]));
 
+
+
+	//dummy klm matrix
+	
+	glUniformMatrix4fv(klmLocation, 1, GL_FALSE, &(globalKlm[0][0]));
+
 	// update displacement control
     glUniform1i(DisplacementLocation, (displacement?1:0)); 
 
@@ -510,6 +542,7 @@ void CreateVBO(void)
 	GLubyte Indices[] = {
 		0, 1, 2, 3
 	};
+
 
 
 	GLenum ErrorCheckValue = glGetError();
@@ -680,6 +713,15 @@ void CreateShaders(void)
 	ModelMatrixLocation = glGetUniformLocation(ProgramId, "ModelMatrix");
 	ViewMatrixLocation = glGetUniformLocation(ProgramId, "ViewMatrix");
 	ProjectionMatrixLocation = glGetUniformLocation(ProgramId, "ProjectionMatrix");
+
+	
+
+	// template KLM matrix with the dummy values
+	CubicSpline tempSpline(0.0f, 0.0f, 0.33f, 0.25f, 0.66f, 0.75f, 1.0f, 1.0f);
+	globalKlm = tempSpline.KLM;
+	klmLocation = glGetUniformLocation(ProgramId, "klmMatrix");
+
+
 
     DisplacementLocation = glGetUniformLocation(ProgramId, "displacement");
     printf("%d\n", DisplacementLocation);

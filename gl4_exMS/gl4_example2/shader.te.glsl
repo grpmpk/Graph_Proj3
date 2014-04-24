@@ -12,13 +12,15 @@ out vec3 tePosition;
 out vec4 teColor;
 
 // using decasteljau
-out float k;
-out float l;
-out float m;
+//out float k;
+//out float l;
+//out float m;
 
 uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
+
+
 
 uniform int displacement;
 
