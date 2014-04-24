@@ -189,8 +189,21 @@ void CubicSpline::CalculateFunctionals()
 	{
 		case Serpentine:
 				_kFunc[0] = _ls*_ms;
-				// TODO: set _kFunc[1-4], _lFunc[0-4] and _mFunc[0-4]
-				// test
+				_kFunc[1] = (1.0/3.0)*(3.0*_ls*_ms -_ls*_mt-_lt*_ms);
+				_kFunc[2] = (1.0/3.0)*(
+					_lt*(_mt-2.0*_ms)+_ls*(3.0*_ms-2.0*_mt)
+					);
+				_kFunc[3] = (_lt-_ls)*(_mt-_ms);
+
+				_lFunc[0] = pow(_ls, 3);
+				_lFunc[1] = pow(_ls, 2)*(_ls-_lt);
+				_lFunc[2] = pow((_lt-_ls), 2)*(_ls);
+				_lFunc[3] = -pow((_lt-_ls), 3);
+
+				_mFunc[0] = pow(_ms, 3);
+				_lFunc[1] = pow(_ms, 2)*(_ms-_mt);
+				_lFunc[2] = pow((_mt-_ms), 2)*(_ms);
+				_lFunc[3] = -pow((_mt-_ms), 3);
 			break;
 		case Cusp:
 				// TODO: set _kFunc[0-4], _lFunc[0-4] and _mFunc[0-4]
