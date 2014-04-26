@@ -87,6 +87,8 @@ CubicSpline::CubicSpline(double x0, double y0, double x1, double y1, double x2, 
 	_vertices[2] = b2;
 	_vertices[3] = b3;
 
+	float x = _vertices[0].x;
+
 	CalculateDs();
 	SetType();
 	CalculateLs();
@@ -489,9 +491,8 @@ void RenderFunction(void)
 	// Draw the triangle
 	// Starting from vertex 0; 6 vertices total -> 2 triangles
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
 	//dummy klm matrix	
-	//glUniformMatrix4fv(klmLocation, 1, GL_FALSE, &(globalKlm[0][0]));
+	// glUniformMatrix4fv(klmLocation, 1, GL_FALSE, &(globalKlm[0][0]));
 
 	glutSwapBuffers();
 	glutPostRedisplay();
@@ -698,9 +699,8 @@ void CreateShaders(void)
 
 	ModelMatrixLocation = glGetUniformLocation(ProgramId, "ModelMatrix");
 	ViewMatrixLocation = glGetUniformLocation(ProgramId, "ViewMatrix");
-	ProjectionMatrixLocation = glGetUniformLocation(ProgramId, "ProjectionMatrix");	
-
-	// template KLM matrix with the dummy values
+	ProjectionMatrixLocation = glGetUniformLocation(ProgramId, "ProjectionMatrix");
+    // template KLM matrix with the dummy values
 	//CubicSpline tempSpline(0.0f, 0.0f, 0.33f, 0.25f, 0.66f, 0.75f, 1.0f, 1.0f);
 	//globalKlm = tempSpline.KLM;
 	//klmLocation = glGetUniformLocation(ProgramId, "klmMatrix");
