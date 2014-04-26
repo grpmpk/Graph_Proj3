@@ -27,11 +27,14 @@ using namespace std;
 
 #define WINDOW_TITLE_PREFIX "OpenGL 4 Sample"
 
+
+
 typedef struct
 {
 	float XYZW[4];
 	float RGBA[4];
-} Vertex;
+	float TEX[3];
+} Vertex;	
 
 enum CubicType { Serpentine, Cusp, Loop, Quadratic, Line, Point };
 
@@ -48,6 +51,7 @@ public:
 	float _kFunc[4];
 	float _lFunc[4];
 	float _mFunc[4];
+	glm::mat4 KLM;
 
 	float _ls;
 	float _lt;
@@ -59,6 +63,7 @@ public:
 	void CalculateLs();
 	void CalculateMs();
 	void CalculateFunctionals();
+	void CreateKLM();
 
 	CubicSpline();
 	CubicSpline(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3);
@@ -87,6 +92,7 @@ CubicSpline::CubicSpline(double x0, double y0, double x1, double y1, double x2, 
 	CalculateLs();
 	CalculateMs();
 	CalculateFunctionals();
+	CreateKLM();
 }
 
 //CubicSpline::CubicSpline(glm::vec3 b0, glm::vec3 b1, glm::vec3 b2, glm::vec3 b3)
@@ -223,7 +229,30 @@ void CubicSpline::CalculateFunctionals()
 			break;
 	}
 }
+void CubicSpline::CreateKLM(){
+	KLM = glm::mat4(1.0);
+	KLM[0].x = _kFunc[0];
+	KLM[0].y = _lFunc[0];
+	KLM[0].z = _mFunc[0];
+	
+	KLM[1].x = _kFunc[1];
+	KLM[1].y = _lFunc[1];
+	KLM[1].z = _mFunc[1];
 
+	
+	KLM[2].x = _kFunc[2];
+	KLM[2].y = _lFunc[2];
+	KLM[2].z = _mFunc[2];
+	
+	KLM[3].x = _kFunc[3];
+	KLM[3].y = _lFunc[3];
+	KLM[3].z = _mFunc[3];
+
+
+	//KLM[0] = glm::vec4(_kFunc[0], _kFunc[1], _kFunc[2], _kFunc[3]);
+	//KLM[1] = glm::vec4(_lFunc[0], _lFunc[1], _lFunc[2], _lFunc[3]);
+	//KLM[2] = glm::vec4(_mFunc[0], _mFunc[1], _mFunc[2], _mFunc[3]);
+}
 
 
 int CurrentWidth = 600,
@@ -238,6 +267,10 @@ float TessLevelOuter = 1.0f;
 glm::mat4 ModelMatrix;
 glm::mat4 ViewMatrix;
 glm::mat4 ProjectionMatrix;
+
+
+glm::mat4 globalKlm;
+GLuint klmLocation;
 
 vector<CubicSpline> splines;
 
@@ -377,7 +410,8 @@ void Initialize(int argc, char* argv[])
 	);
 
 	// Init OpenGL
-	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+	// GRP: commented out so that polygon is filled initially
+	//glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     glEnable(GL_DEPTH_TEST);
 
 	// Init Shaders and Vertices
@@ -447,23 +481,17 @@ void RenderFunction(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	// update tessellation level
-	glUniform1f(TessLevelInnerLocation, TessLevelInner);
-	glUniform1f(TessLevelOuterLocation, TessLevelOuter);
-
 	// update Matrix
 	glUniformMatrix4fv(ModelMatrixLocation, 1, GL_FALSE, &(ModelMatrix[0][0]));
 	glUniformMatrix4fv(ViewMatrixLocation, 1, GL_FALSE, &(ViewMatrix[0][0]));
 	glUniformMatrix4fv(ProjectionMatrixLocation, 1, GL_FALSE, &(ProjectionMatrix[0][0]));
 
-	// update displacement control
-    glUniform1i(DisplacementLocation, (displacement?1:0)); 
+	// Draw the triangle
+	// Starting from vertex 0; 6 vertices total -> 2 triangles
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	// specify the patch type
-	glPatchParameteri(GL_PATCH_VERTICES, 3); 
-
-	// draw patch
-	glDrawElements(GL_PATCHES, 12, GL_UNSIGNED_BYTE, NULL);
+	//dummy klm matrix	
+	//glUniformMatrix4fv(klmLocation, 1, GL_FALSE, &(globalKlm[0][0]));
 
 	glutSwapBuffers();
 	glutPostRedisplay();
@@ -496,26 +524,31 @@ void CreateVBO(void)
 {
 	Vertex Vertices[] =
 	{
-		{ {  0.0,   0.0f, 0.0f, 1.0f },  { 1.0f, 1.0f, 1.0f, 1.0f } }, // 0
-		{ {  0.33f, 0.25f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 1
-		{ {  0.66f, 0.75f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 2
-		{ {  1.0f, 1.0f, 0.0f, 1.0f },   { 1.0f, 1.0f, 1.0f, 1.0f } }, // 3
+		// Note: for tex coords, UV (use only first two values) or KLM (use all 3)
+		// - for UV, values are ALWAYS [0,0], [0.5, 0], and [1,1] RESPECTIVELY for 3 vertices (see Figure 25-2)
+		// - for KLM, values need to be calculated (on CPU and pass it in or GPU)
 
-		//{ {  270.234, 380.754, 1.0, 1.0f },  { 1.0f, 1.0f, 1.0f, 1.0f } }, // 0
-		//{ {  270.879f, 382.582f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 1
-		//{ {  271.523f, 384.411f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 2
-		//{ {  272.168f, 386.239f, 1.0f, 1.0f },   { 1.0f, 1.0f, 1.0f, 1.0f } }, // 3
+		// Triangle #1:
+		// vertex 0
+		{
+			{ 0.0f, 0.0f, 0.0f, 1.0f }, // position
+			{ 1.0f, 1.0f, 1.0f, 1.0f }, // color
+			{ 0.0f, 0.0f, 0.0f }        // tex coords
+		},
+		{ {  1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f } }, // vertex 1		
+		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f } }, // vertex 2
+
+		// Triangle #2
+		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
+		{ {  2.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f } }, // vertex 1
+		{ {  2.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f } }, // vertex 2
 	};
-
-	GLubyte Indices[] = {
-		0, 1, 2, 3
-	};
-
 
 	GLenum ErrorCheckValue = glGetError();
 	const size_t BufferSize = sizeof(Vertices);
 	const size_t VertexSize = sizeof(Vertices[0]);
 	const size_t RgbOffset = sizeof(Vertices[0].XYZW);
+	const size_t TexOffset = sizeof(Vertices[0].XYZW) + sizeof(Vertices[0].RGBA);
 	
 	// Create Vertex Array Object
 	glGenVertexArrays(1, &VaoId);
@@ -529,14 +562,11 @@ void CreateVBO(void)
 	// Assign vertex attributes
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, VertexSize, 0);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)RgbOffset);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)TexOffset);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
-	
-	// Vreate Buffer for indics
-	glGenBuffers(1, &IndexBufferId);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBufferId);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(2);  
 
 	ErrorCheckValue = glGetError();
 	if (ErrorCheckValue != GL_NO_ERROR)
@@ -555,14 +585,12 @@ void DestroyVBO(void)
 {
 	GLenum ErrorCheckValue = glGetError();
 
+	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &BufferId);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glDeleteBuffers(2, &IndexBufferId);
 
 	glBindVertexArray(0);
 	glDeleteVertexArrays(1, &VaoId);
@@ -647,15 +675,9 @@ void CreateShaders(void)
 
 	FragmentShaderId = LoadShader("shader.ps.glsl", GL_FRAGMENT_SHADER); 
 
-	TessControlShaderId = LoadShader("shader.tc.glsl", GL_TESS_CONTROL_SHADER); 
-
-	TessEvalShaderId = LoadShader("shader.te.glsl", GL_TESS_EVALUATION_SHADER); 
-
 	ProgramId = glCreateProgram();
 	glAttachShader(ProgramId, VertexShaderId);
 	glAttachShader(ProgramId, FragmentShaderId);
-	glAttachShader(ProgramId, TessControlShaderId);
-	glAttachShader(ProgramId, TessEvalShaderId);
 
 	glLinkProgram(ProgramId);
 	ErrorCheckValue = glGetError();
@@ -674,15 +696,14 @@ void CreateShaders(void)
 
 	glUseProgram(ProgramId);
 
-	TessLevelInnerLocation = glGetUniformLocation(ProgramId, "TessLevelInner");
-	TessLevelOuterLocation = glGetUniformLocation(ProgramId, "TessLevelOuter");
-
 	ModelMatrixLocation = glGetUniformLocation(ProgramId, "ModelMatrix");
 	ViewMatrixLocation = glGetUniformLocation(ProgramId, "ViewMatrix");
-	ProjectionMatrixLocation = glGetUniformLocation(ProgramId, "ProjectionMatrix");
+	ProjectionMatrixLocation = glGetUniformLocation(ProgramId, "ProjectionMatrix");	
 
-    DisplacementLocation = glGetUniformLocation(ProgramId, "displacement");
-    printf("%d\n", DisplacementLocation);
+	// template KLM matrix with the dummy values
+	//CubicSpline tempSpline(0.0f, 0.0f, 0.33f, 0.25f, 0.66f, 0.75f, 1.0f, 1.0f);
+	//globalKlm = tempSpline.KLM;
+	//klmLocation = glGetUniformLocation(ProgramId, "klmMatrix");
 
 	ErrorCheckValue = glGetError();
 	if (ErrorCheckValue != GL_NO_ERROR)

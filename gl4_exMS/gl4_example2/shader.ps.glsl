@@ -1,14 +1,19 @@
 #version 400
 
-in vec4 teColor;
-in float k;
-in float l;
-in float m;
+in vec4 vColor;
+in vec3 vTEX;
 
 out vec4 out_Color;
 
 void main(void)
 {
-	out_Color = teColor;
-//	out_Color = vec4(1,1,1,1);
+    // TODO: comparison needs to be reversed between concave vs convex (i.e., red vs blue)
+	if (vTEX.x*vTEX.x - vTEX.y >= 0)
+	{
+	    discard;
+	}
+	else
+	{
+	    out_Color = vColor;
+	}
 }
