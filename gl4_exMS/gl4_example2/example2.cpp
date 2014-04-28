@@ -221,7 +221,20 @@ void CubicSpline::CalculateFunctionals()
 				_mFunc[3] = -pow((_mt-_ms), 3);
 			break;
 		case Cusp:
-				// TODO: set _kFunc[0-4], _lFunc[0-4] and _mFunc[0-4]
+				_kFunc[0] = _ls;
+				_kFunc[1] = _ls - (1/3)*_lt;
+				_kFunc[2] = _ls - (2/3)*_lt;
+				_kFunc[3] = (_ls-_lt);
+
+				_lFunc[0] = pow(_ls, 3);
+				_lFunc[1] = pow(_ls,2)*(_ls-_lt);
+				_lFunc[2] = pow((_ls-_lt),2)*_ls;
+				_lFunc[3] = pow((_ls-_lt), 3);
+
+				_mFunc[0] = 1;
+				_mFunc[1] = 1;
+				_mFunc[2] = 1;
+				_mFunc[3] = 1;
 			break;
 		case Loop:
 				_kFunc[0] = _ls*_ms;
