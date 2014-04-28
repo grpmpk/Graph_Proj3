@@ -162,7 +162,8 @@ void CubicSpline::CalculateLs()
 			_lt = 6.0*_d1;
 			break;
 		case Cusp:
-				// TODO: set _ls and _lt
+			_ls = _d3;
+			_lt = 3*_d2;
 			break;
 		case Loop:
 			_ls = _d2 - sqrt((4*_d1*_d3)-(3*(pow(_d2,2))));
@@ -184,7 +185,9 @@ void CubicSpline::CalculateMs()
 			_mt = 6.0*_d1;
 			break;
 		case Cusp:
-			// TODO: set _ms and _mt
+			//setting ms and mt to 1 as they do not matter here
+			_ms = 1;
+			_mt = 1;
 			break;
 		case Loop:
 			_ms = _d2 - sqrt((4*_d1*_d3)-(3*(pow(_d2,2))));
