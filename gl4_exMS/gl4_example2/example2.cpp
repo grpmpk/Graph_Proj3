@@ -165,7 +165,8 @@ void CubicSpline::CalculateLs()
 				// TODO: set _ls and _lt
 			break;
 		case Loop:
-				// TODO: set _ls and _lt
+			_ls = _d2 - sqrt((4*_d1*_d3)-(3*(pow(_d2,2))));
+			_lt = 2*_d1;
 			break;
 		case Quadratic:
 				// TODO: set _ls and _lt
