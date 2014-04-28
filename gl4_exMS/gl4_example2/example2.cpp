@@ -187,7 +187,8 @@ void CubicSpline::CalculateMs()
 			// TODO: set _ms and _mt
 			break;
 		case Loop:
-			// TODO: set _ms and _mt
+			_ms = _d2 - sqrt((4*_d1*_d3)-(3*(pow(_d2,2))));
+			_mt = 2*_d1;
 			break;
 		case Quadratic:
 			// TODO: set _ms and _mt
@@ -223,7 +224,23 @@ void CubicSpline::CalculateFunctionals()
 				// TODO: set _kFunc[0-4], _lFunc[0-4] and _mFunc[0-4]
 			break;
 		case Loop:
-				// TODO: set _kFunc[0-4], _lFunc[0-4] and _mFunc[0-4]
+				_kFunc[0] = _ls*_ms;
+				_kFunc[1] = (1.0/3.0)*(-1*_ls*_mt -_lt*_ms-_ls*_ms);
+				_kFunc[2] = (1.0/3.0)*(
+					_lt*(_mt-2.0*_ms)+_ls*(3.0*_ms-2.0*_mt)
+					);
+				_kFunc[3] = (_lt-_ls)*(_mt-_ms);
+
+				_lFunc[0] = pow(_ls, 2)*_ms;
+				_lFunc[1] = (-1/3)*_ls*(_ls*(_mt - 3*_ms) + 2*_lt*_ms);
+				_lFunc[2] = (1/3)*(_lt - _ls)*(_ls*(2*_mt - 3*_ms) + _lt*_ms);
+				_lFunc[3] = -pow((_lt-_ls), 2)*(_mt-_ms);
+
+				_mFunc[0] = _ls*pow(_ms, 2);
+				_mFunc[1] = (-1/3)*_ms*(_ls*(2*_mt - 3*_ms) + _lt*_ms);
+				_mFunc[2] = (1/3)*(_mt-_ms)*(_ls*(_mt - 3*_ms) + 2*_lt*_ms);
+				_mFunc[3] = -1*(_lt-_ls)*pow((_mt-_ms), 2);
+
 			break;
 		case Quadratic:
 				// TODO: set _kFunc[0-4], _lFunc[0-4] and _mFunc[0-4]
