@@ -234,10 +234,10 @@ void CubicSpline::CalculateFunctionals()
 				_lFunc[2] = pow((_ls-_lt),2)*_ls;
 				_lFunc[3] = pow((_ls-_lt), 3);
 
-				_mFunc[0] = 1;
-				_mFunc[1] = 1;
-				_mFunc[2] = 1;
-				_mFunc[3] = 1;
+				_mFunc[0] = 1.0;
+				_mFunc[1] = 1.0;
+				_mFunc[2] = 1.0;
+				_mFunc[3] = 1.0;
 			break;
 		case Loop:
 				_kFunc[0] = _ls*_ms;
@@ -259,7 +259,20 @@ void CubicSpline::CalculateFunctionals()
 
 			break;
 		case Quadratic:
-				// TODO: set _kFunc[0-4], _lFunc[0-4] and _mFunc[0-4]
+				_kFunc[0] = 0.0;
+				_kFunc[1] = (1.0/3.0);
+				_kFunc[2] = (2.0/3.0);
+				_kFunc[3] = 1.0;
+
+				_lFunc[0] = 0.0;
+				_lFunc[1] = 0.0;
+				_lFunc[2] = (1.0/3.0);
+				_lFunc[3] = 1.0;
+
+				_mFunc[0] = 0.0;
+				_mFunc[1] = (1.0/3.0);
+				_mFunc[2] = (2.0/3.0);
+				_mFunc[3] = 1.0;
 			break;
 		default:
 			break;
