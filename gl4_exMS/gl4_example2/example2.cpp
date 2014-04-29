@@ -27,14 +27,12 @@ using namespace std;
 
 #define WINDOW_TITLE_PREFIX "OpenGL 4 Sample"
 
-
-
 typedef struct
 {
 	float XYZW[4];
 	float RGBA[4];
 	float TEX[3];
-	int isRed; //0 == false , 1 == true
+	int isBlue; //0 == false , 1 == true
 } Vertex;	
 
 enum CubicType { Serpentine, Cusp, Loop, Quadratic, Line, Point };
@@ -339,6 +337,8 @@ GLuint
 	ProgramFilledId,
 	VaoId,
 	BufferId,
+	VaoFilledId,
+	BufferFilledId,
 	IndexBufferId;
 
 GLuint TessLevelInnerLocation,
@@ -346,7 +346,10 @@ GLuint TessLevelInnerLocation,
 
 GLuint ModelMatrixLocation,
 	ViewMatrixLocation,
-	ProjectionMatrixLocation;
+	ProjectionMatrixLocation,
+	ModelMatrixLocationFilled,
+	ViewMatrixLocationFilled,
+	ProjectionMatrixLocationFilled;
 
 GLuint DisplacementLocation;
 
@@ -358,10 +361,13 @@ void IdleFunction(void);
 void KeyboardFunction(unsigned char, int, int);
 void Cleanup(void);
 void CreateVBO(void);
+void CreateVBOFilled(void);
 void CreateShadersFilled(void);
 void CreateShaders(void);
 void DestroyVBO(void);
+void DestroyVBOFilled(void);
 void DestroyShaders(void);
+void DestroyShadersFilled(void);
 
 void loadSvg(){
 	struct NSVGimage* image;
@@ -470,8 +476,10 @@ void Initialize(int argc, char* argv[])
 
 	// Init Shaders and Vertices
 	CreateShaders();
-	CreateShadersFilled();
 	CreateVBO();
+
+	CreateShadersFilled();
+	CreateVBOFilled();
 
 
 	// Init Matrix	
@@ -536,21 +544,39 @@ void RenderFunction(void)
 	++FrameCount;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(ProgramId);
 	
 	// update Matrix
 	glUniformMatrix4fv(ModelMatrixLocation, 1, GL_FALSE, &(ModelMatrix[0][0]));
 	glUniformMatrix4fv(ViewMatrixLocation, 1, GL_FALSE, &(ViewMatrix[0][0]));
 	glUniformMatrix4fv(ProjectionMatrixLocation, 1, GL_FALSE, &(ProjectionMatrix[0][0]));
 
+	glBindVertexArray(VaoId);
+	glBindBuffer(GL_ARRAY_BUFFER, BufferId);
+
 	// Draw the triangle
 	// Starting from vertex 0; 6 vertices total -> 2 triangles
-	glUseProgram(ProgramId);
-//	CreateShaders();
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-	//glutPostRedisplay();
+    glDrawArrays(GL_TRIANGLES, 0, 24);
+
+	glBindVertexArray(0);
+	glUseProgram(0);
+
 	glUseProgram(ProgramFilledId);
-	//CreateShadersFilled();
+
+	// update Matrix
+	glUniformMatrix4fv(ModelMatrixLocationFilled, 1, GL_FALSE, &(ModelMatrix[0][0]));
+	glUniformMatrix4fv(ViewMatrixLocationFilled, 1, GL_FALSE, &(ViewMatrix[0][0]));
+	glUniformMatrix4fv(ProjectionMatrixLocationFilled, 1, GL_FALSE, &(ProjectionMatrix[0][0]));
+
+	glBindVertexArray(VaoFilledId);
+	glBindBuffer(GL_ARRAY_BUFFER, BufferFilledId);
+
     glDrawArrays(GL_TRIANGLES, 3, 3);
+
+	glBindVertexArray(0);
+	glUseProgram(0);
+
 	//dummy klm matrix	
 	// glUniformMatrix4fv(klmLocation, 1, GL_FALSE, &(globalKlm[0][0]));
 
@@ -580,6 +606,9 @@ void Cleanup(void)
 {
 	DestroyShaders();
 	DestroyVBO();
+
+	DestroyShadersFilled();
+	DestroyVBOFilled();
 }
 
 void CreateVBO(void)
@@ -593,21 +622,52 @@ void CreateVBO(void)
 		// Triangle #1:
 		// vertex 0
 		{
-			{ 0.0f, 0.0f, 0.0f, 1.0f }, // position
+			{ 0.8f, 0.0f, 0.0f, 1.0f }, // position
 			{ 1.0f, 1.0f, 1.0f, 1.0f }, // color
-			{ 0.0f, 0.0f, 0.0f },        // tex coords
-			{ 0}
+			{ 0.0f, 0.0f, 0.0f },       // tex coords
+			{ 0 }  // isBlue
 		},
-		{ {  1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, {0} }, // vertex 1		
-		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, {0} }, // vertex 2
-		
+		{ {  0.777686f, 0.289685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1		
+		{ {  0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+
 		// Triangle #2
-		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, {1} }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
-		{ {  2.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, {1} }, // vertex 1
-		{ {  2.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, {1} }, // vertex 2
+		{ {  0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
+		{ {  0.374315, 0.705685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1
+		{ {  0.0f, 0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+
+		// Triangle #3
+		{ {  0.0f, 0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0
+		{ {  -0.374315, 0.705685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1
+		{ {  -0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+
+		// Triangle #4:		
+		{ {  -0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0
+		{ {  -0.777686f, 0.289685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1		
+		{ {  -0.8f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+
+		// Triangle #5:
+		{ {  -0.8f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0
+		{ {  -0.777686f, -0.289685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1		
+		{ {  -0.565685f, -0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+
+		// Triangle #6:
+		{ {  -0.565685f, -0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 0
+		{ {  -0.374315, -0.705685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1
+		{ {  0.0f, -0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 2
+
+		// Triangle #7
+		{ {  0.0f, -0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
+		{ {  0.245868, -0.813686, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1
+		{ {  0.443999, -0.72f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+				
+		// Triangle #8:
 		
+		{ {  0.443999, -0.72f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0
+		{ {  0.617685, -0.582315, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1		
+		{ {  0.75f, -0.368001, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+
 	};
-	//glUseProgram(ProgramId);
+
 	GLenum ErrorCheckValue = glGetError();
 	const size_t BufferSize = sizeof(Vertices);
 	const size_t VertexSize = sizeof(Vertices[0]);
@@ -648,11 +708,11 @@ void CreateVBO(void)
 	}
 }
 
-
 void DestroyVBO(void)
 {
 	GLenum ErrorCheckValue = glGetError();
 
+    glDisableVertexAttribArray(3);
 	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
@@ -662,6 +722,100 @@ void DestroyVBO(void)
 
 	glBindVertexArray(0);
 	glDeleteVertexArrays(1, &VaoId);
+
+	ErrorCheckValue = glGetError();
+	if (ErrorCheckValue != GL_NO_ERROR)
+	{
+		fprintf(
+			stderr,
+			"ERROR: Could not destroy the VBO: %s \n",
+			gluErrorString(ErrorCheckValue)
+		);
+
+		exit(-1);
+	}
+}
+
+void CreateVBOFilled(void)
+{
+	Vertex Vertices[] =
+	{
+		// Note: for tex coords, UV (use only first two values) or KLM (use all 3)
+		// - for UV, values are ALWAYS [0,0], [0.5, 0], and [1,1] RESPECTIVELY for 3 vertices (see Figure 25-2)
+		// - for KLM, values need to be calculated (on CPU and pass it in or GPU)
+
+		// Triangle #1:
+		// vertex 0
+		{
+			{ 0.0f, 0.0f, 0.0f, 1.0f }, // position
+			{ 1.0f, 1.0f, 1.0f, 1.0f }, // color
+			{ 0.0f, 0.0f, 0.0f },        // tex coords
+			{ 0}
+		},
+		{ {  1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, {0} }, // vertex 1		
+		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, {0} }, // vertex 2
+		
+		// Triangle #2
+		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, {1} }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
+		{ {  2.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, {1} }, // vertex 1
+		{ {  2.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, {1} }, // vertex 2
+		
+	};
+
+	GLenum ErrorCheckValue = glGetError();
+	const size_t BufferSize = sizeof(Vertices);
+	const size_t VertexSize = sizeof(Vertices[0]);
+	const size_t RgbOffset = sizeof(Vertices[0].XYZW);
+	const size_t TexOffset = sizeof(Vertices[0].XYZW) + sizeof(Vertices[0].RGBA);
+	const size_t isRedOffset = sizeof(Vertices[0].XYZW) + sizeof(Vertices[0].RGBA) + sizeof(Vertices[0].TEX);
+
+
+	// Create Vertex Array Object
+	glGenVertexArrays(1, &VaoFilledId);
+	glBindVertexArray(VaoFilledId);
+	
+	// Create Buffer for vertex data
+	glGenBuffers(1, &BufferFilledId);
+	glBindBuffer(GL_ARRAY_BUFFER, BufferFilledId);
+	glBufferData(GL_ARRAY_BUFFER, BufferSize, Vertices, GL_STATIC_DRAW);
+
+	// Assign vertex attributes
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, VertexSize, 0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)RgbOffset);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)TexOffset);
+	glVertexAttribPointer(3, 1, GL_INT, GL_FALSE, VertexSize, (GLvoid*)isRedOffset);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);  
+	glEnableVertexAttribArray(3);  
+
+	ErrorCheckValue = glGetError();
+	if (ErrorCheckValue != GL_NO_ERROR)
+	{
+		fprintf(
+			stderr,
+			"ERROR: Could not create a VBO: %s \n",
+			gluErrorString(ErrorCheckValue)
+		);
+
+		exit(-1);
+	}
+}
+
+void DestroyVBOFilled(void)
+{
+	GLenum ErrorCheckValue = glGetError();
+
+    glDisableVertexAttribArray(3);
+	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(0);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &BufferFilledId);
+
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &VaoFilledId);
 
 	ErrorCheckValue = glGetError();
 	if (ErrorCheckValue != GL_NO_ERROR)
@@ -762,7 +916,6 @@ void CreateShaders(void)
 		exit(-1);
 	}
 
-	// Program 1 part 2:
 	glUseProgram(ProgramId);
 
 	ModelMatrixLocation = glGetUniformLocation(ProgramId, "ModelMatrix");
@@ -814,12 +967,12 @@ void CreateShadersFilled(void)
 		
 		exit(-1);
 	}
-	//Program 2 part 2
-	/*glUseProgram(ProgramFilledId);
 
-	//ModelMatrixLocation = glGetUniformLocation(ProgramFilledId, "ModelMatrix");
-	//ViewMatrixLocation = glGetUniformLocation(ProgramFilledId, "ViewMatrix");
-	//ProjectionMatrixLocation = glGetUniformLocation(ProgramFilledId, "ProjectionMatrix");
+	glUseProgram(ProgramFilledId);
+
+	ModelMatrixLocationFilled = glGetUniformLocation(ProgramFilledId, "ModelMatrix");
+	ViewMatrixLocationFilled = glGetUniformLocation(ProgramFilledId, "ViewMatrix");
+	ProjectionMatrixLocationFilled = glGetUniformLocation(ProgramFilledId, "ProjectionMatrix");
     // template KLM matrix with the dummy values
 	//CubicSpline tempSpline(0.0f, 0.0f, 0.33f, 0.25f, 0.66f, 0.75f, 1.0f, 1.0f);
 	//globalKlm = tempSpline.KLM;
@@ -833,12 +986,12 @@ void CreateShadersFilled(void)
 			stderr,
 			"ERROR: Could not create the shaders: %s \n",
 			/*gluErrorString(ErrorCheckValue)*/
-			//log
-	//	);
+			log
+		);
 
-	//	exit(-1);
-	//}
-	//
+		exit(-1);
+	}
+	
 }
 
 void DestroyShaders(void)
@@ -850,16 +1003,36 @@ void DestroyShaders(void)
 	glDetachShader(ProgramId, VertexShaderId);
 	glDetachShader(ProgramId, FragmentShaderId);
 	
-	glDetachShader(ProgramFilledId, VertexShaderFilledId);
-	glDetachShader(ProgramFilledId, FragmentShaderFilledId);
-
 	glDeleteShader(FragmentShaderId);
 	glDeleteShader(VertexShaderId);
+
+	glDeleteProgram(ProgramId);
+
+	ErrorCheckValue = glGetError();
+	if (ErrorCheckValue != GL_NO_ERROR)
+	{
+		fprintf(
+			stderr,
+			"ERROR: Could not destroy the shaders: %s \n",
+			gluErrorString(ErrorCheckValue)
+		);
+
+		exit(-1);
+	}
+}
+
+void DestroyShadersFilled(void)
+{
+	GLenum ErrorCheckValue = glGetError();
+
+	glUseProgram(0);
+
+	glDetachShader(ProgramFilledId, VertexShaderFilledId);
+	glDetachShader(ProgramFilledId, FragmentShaderFilledId);
 
 	glDeleteShader(FragmentShaderFilledId);
 	glDeleteShader(VertexShaderFilledId);
 
-	glDeleteProgram(ProgramId);
 	glDeleteProgram(ProgramFilledId);
 
 	ErrorCheckValue = glGetError();
