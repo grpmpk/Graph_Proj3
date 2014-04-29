@@ -34,6 +34,7 @@ typedef struct
 	float XYZW[4];
 	float RGBA[4];
 	float TEX[3];
+	int isRed; //0 == false , 1 == true
 } Vertex;	
 
 enum CubicType { Serpentine, Cusp, Loop, Quadratic, Line, Point };
@@ -581,15 +582,16 @@ void CreateVBO(void)
 		{
 			{ 0.0f, 0.0f, 0.0f, 1.0f }, // position
 			{ 1.0f, 1.0f, 1.0f, 1.0f }, // color
-			{ 0.0f, 0.0f, 0.0f }        // tex coords
+			{ 0.0f, 0.0f, 0.0f },        // tex coords
+			{ 0}
 		},
-		{ {  1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f } }, // vertex 1		
-		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f } }, // vertex 2
+		{ {  1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, {0} }, // vertex 1		
+		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, {0} }, // vertex 2
 
 		// Triangle #2
-		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
-		{ {  2.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f } }, // vertex 1
-		{ {  2.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f } }, // vertex 2
+		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, {1} }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
+		{ {  2.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, {1} }, // vertex 1
+		{ {  2.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, {1} }, // vertex 2
 	};
 
 	GLenum ErrorCheckValue = glGetError();
@@ -597,7 +599,9 @@ void CreateVBO(void)
 	const size_t VertexSize = sizeof(Vertices[0]);
 	const size_t RgbOffset = sizeof(Vertices[0].XYZW);
 	const size_t TexOffset = sizeof(Vertices[0].XYZW) + sizeof(Vertices[0].RGBA);
-	
+	const size_t isRedOffset = sizeof(Vertices[0].XYZW) + sizeof(Vertices[0].RGBA) + sizeof(Vertices[0].TEX);
+
+
 	// Create Vertex Array Object
 	glGenVertexArrays(1, &VaoId);
 	glBindVertexArray(VaoId);
@@ -611,10 +615,11 @@ void CreateVBO(void)
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, VertexSize, 0);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)RgbOffset);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*)TexOffset);
-
+	glVertexAttribPointer(3, 1, GL_INT, GL_FALSE, VertexSize, (GLvoid*)isRedOffset);
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);  
+	glEnableVertexAttribArray(3);  
 
 	ErrorCheckValue = glGetError();
 	if (ErrorCheckValue != GL_NO_ERROR)

@@ -3,6 +3,7 @@
 
 in vec4 vColor;
 in vec3 vTEX;
+flat in int isRp;
 
 out vec4 out_Color;
 
@@ -35,12 +36,26 @@ void main(void)
     // detKLM();
 
     // TODO: comparison needs to be reversed between concave vs convex (i.e., red vs blue)
-	if (vTEX.x*vTEX.x - vTEX.y >= 0)
+	if(isRp > 0)
 	{
-	    discard;
+		if (vTEX.x*vTEX.x - vTEX.y >= 0)
+		{
+			discard;
+		}
+		else
+		{
+			out_Color = vColor;
+		}
 	}
 	else
 	{
-	    out_Color = vColor;
+		if (vTEX.x*vTEX.x - vTEX.y >= 0)
+		{
+			out_Color = vColor;
+		}
+		else
+		{
+			discard;
+		}
 	}
 }
