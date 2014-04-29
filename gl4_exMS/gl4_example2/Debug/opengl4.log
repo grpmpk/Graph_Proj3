@@ -1,12 +1,30 @@
-﻿Build started 4/28/2014 8:23:38 PM.
+﻿Build started 4/28/2014 8:25:35 PM.
      1>Project "C:\Users\Samuel\Documents\GitHub\Graph_Proj3\gl4_exMS\gl4_example2\opengl4.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\opengl4.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         All outputs are up-to-date.
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /IC:\Users\Samuel\Documents\GitHub\Graph_Proj3\gl4_exMS\gl4_example2\\include /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt example2.cpp
+         example2.cpp
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\nanosvg.h(475): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(162): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(163): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(185): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(186): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(211): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(214): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(245): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(248): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(264): warning C4305: '=' : truncation from 'double' to 'float'
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(265): warning C4305: '=' : truncation from 'double' to 'float'
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(270): warning C4305: '=' : truncation from 'double' to 'float'
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(274): warning C4305: '=' : truncation from 'double' to 'float'
+     1>c:\users\samuel\documents\github\graph_proj3\gl4_exms\gl4_example2\example2.cpp(275): warning C4305: '=' : truncation from 'double' to 'float'
        Link:
-         All outputs are up-to-date.
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Samuel\Documents\GitHub\Graph_Proj3\gl4_exMS\gl4_example2\Debug\opengl4.exe" /NOLOGO /LIBPATH:C:\Users\Samuel\Documents\GitHub\Graph_Proj3\gl4_exMS\gl4_example2\\lib glew32.lib freeglut.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\opengl4.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Samuel\Documents\GitHub\Graph_Proj3\gl4_exMS\gl4_example2\Debug\opengl4.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Samuel\Documents\GitHub\Graph_Proj3\gl4_exMS\gl4_example2\Debug\opengl4.lib" /MACHINE:X86 Debug\example2.obj
+         LINK : C:\Users\Samuel\Documents\GitHub\Graph_Proj3\gl4_exMS\gl4_example2\Debug\opengl4.exe not found or not built by the last incremental link; performing full link
          opengl4.vcxproj -> C:\Users\Samuel\Documents\GitHub\Graph_Proj3\gl4_exMS\gl4_example2\Debug\opengl4.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\Users\Samuel\Documents\GitHub\Graph_Proj3\gl4_exMS\gl4_example2\Debug\opengl4.exe;#1" /manifest Debug\opengl4.exe.intermediate.manifest
        FinalizeBuildStatus:
          Deleting file "Debug\opengl4.unsuccessfulbuild".
          Touching "Debug\opengl4.lastbuildstate".
@@ -14,4 +32,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.04
+Time Elapsed 00:00:01.30

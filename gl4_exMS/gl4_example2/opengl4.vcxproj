@@ -14,6 +14,8 @@
     <ClCompile Include="example2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shader.Filledps.glsl" />
+    <None Include="shader.Filledvs.glsl" />
     <None Include="shader.ps.glsl" />
     <None Include="shader.tc.glsl" />
     <None Include="shader.te.glsl" />
