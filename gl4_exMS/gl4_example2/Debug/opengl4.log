@@ -1,4 +1,4 @@
-﻿Build started 4/28/2014 8:25:35 PM.
+﻿Build started 4/28/2014 9:53:39 PM.
      1>Project "C:\Users\Samuel\Documents\GitHub\Graph_Proj3\gl4_exMS\gl4_example2\opengl4.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\opengl4.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -32,4 +32,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.30
+Time Elapsed 00:00:01.00

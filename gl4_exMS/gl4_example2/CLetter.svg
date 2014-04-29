@@ -9,8 +9,8 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
+   width="5"
+   height="5"
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
@@ -24,9 +24,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="7.9195959"
-     inkscape:cx="36.439622"
-     inkscape:cy="1021.7336"
+     inkscape:zoom="63.356767"
+     inkscape:cx="4.484797"
+     inkscape:cy="2.3132247"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -50,11 +50,12 @@
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(0,-1047.3622)">
     <g
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
        id="flowRoot2985"
-       transform="matrix(0.29255313,0,0,0.29255313,-63.723701,-108.73844)">
+       transform="matrix(0.02480732,0,0,0.02480732,-5.5633003,1041.6596)">
       <path
          d="m 270.23437,380.75436 1.9336,5.48438 -0.49219,0 c -5.01567,-4.99214 -10.92191,-7.48823 -17.71875,-7.48828 -7.05471,5e-5 -12.75588,2.0977 -17.10351,6.29296 -4.34767,4.19536 -6.5215,9.26957 -6.52149,15.22266 -1e-5,3.67971 0.96679,7.91018 2.90039,12.69141 1.93358,4.78126 4.98631,8.7129 9.1582,11.79492 4.17186,3.08203 9.22263,4.62305 15.15235,4.62305 3.89059,0 7.70503,-0.62696 11.44336,-1.88086 3.73823,-1.25391 6.52143,-2.93554 8.34961,-5.04493 l 0.45703,0.14063 -3.6211,5.55469 c -5.85942,1.26562 -9.66215,2.01562 -11.4082,2.25 -1.74613,0.23437 -4.08402,0.35156 -7.01367,0.35156 -10.85158,0 -18.61525,-2.51367 -23.29102,-7.54102 -4.67578,-5.02733 -7.01367,-11.0449 -7.01367,-18.05273 0,-4.73435 1.20117,-9.28708 3.60352,-13.6582 2.40233,-4.37105 5.86522,-7.81636 10.38867,-10.33594 4.52342,-2.51948 9.69138,-3.77924 15.50391,-3.7793 2.90621,6e-5 5.41988,0.26373 7.54101,0.79102 2.12105,0.52739 3.88472,1.07231 5.29102,1.63476 l 2.32031,0.87891 c 0.0703,0.0235 0.11714,0.0469 0.14062,0.0703 z"
          style="font-size:72px;font-variant:normal;font-stretch:normal;font-family:Felix Titling;-inkscape-font-specification:Felix Titling"

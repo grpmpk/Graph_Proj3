@@ -331,9 +331,12 @@ bool displacement = false;
 GLuint
 	VertexShaderId,
 	FragmentShaderId,
+	VertexShaderFilledId,
+	FragmentShaderFilledId,
 	TessControlShaderId,
 	TessEvalShaderId,
 	ProgramId,
+	ProgramFilledId,
 	VaoId,
 	BufferId,
 	IndexBufferId;
@@ -355,8 +358,9 @@ void IdleFunction(void);
 void KeyboardFunction(unsigned char, int, int);
 void Cleanup(void);
 void CreateVBO(void);
-void DestroyVBO(void);
+void CreateShadersFilled(void);
 void CreateShaders(void);
+void DestroyVBO(void);
 void DestroyShaders(void);
 
 void loadSvg(){
@@ -466,7 +470,9 @@ void Initialize(int argc, char* argv[])
 
 	// Init Shaders and Vertices
 	CreateShaders();
+	CreateShadersFilled();
 	CreateVBO();
+
 
 	// Init Matrix	
 	ModelMatrix = glm::mat4(1.0);	// Identity Matrix
@@ -538,12 +544,19 @@ void RenderFunction(void)
 
 	// Draw the triangle
 	// Starting from vertex 0; 6 vertices total -> 2 triangles
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+	glUseProgram(ProgramId);
+//	CreateShaders();
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+	//glutPostRedisplay();
+	glUseProgram(ProgramFilledId);
+	//CreateShadersFilled();
+    glDrawArrays(GL_TRIANGLES, 3, 3);
 	//dummy klm matrix	
 	// glUniformMatrix4fv(klmLocation, 1, GL_FALSE, &(globalKlm[0][0]));
 
 	glutSwapBuffers();
 	glutPostRedisplay();
+	
 }
 
 void IdleFunction(void)
@@ -587,13 +600,14 @@ void CreateVBO(void)
 		},
 		{ {  1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, {0} }, // vertex 1		
 		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, {0} }, // vertex 2
-
+		
 		// Triangle #2
 		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, {1} }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
 		{ {  2.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, {1} }, // vertex 1
 		{ {  2.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, {1} }, // vertex 2
+		
 	};
-
+	//glUseProgram(ProgramId);
 	GLenum ErrorCheckValue = glGetError();
 	const size_t BufferSize = sizeof(Vertices);
 	const size_t VertexSize = sizeof(Vertices[0]);
@@ -633,6 +647,7 @@ void CreateVBO(void)
 		exit(-1);
 	}
 }
+
 
 void DestroyVBO(void)
 {
@@ -747,6 +762,7 @@ void CreateShaders(void)
 		exit(-1);
 	}
 
+	// Program 1 part 2:
 	glUseProgram(ProgramId);
 
 	ModelMatrixLocation = glGetUniformLocation(ProgramId, "ModelMatrix");
@@ -770,6 +786,59 @@ void CreateShaders(void)
 
 		exit(-1);
 	}
+
+}
+void CreateShadersFilled(void)
+{
+	GLchar log[2014];
+	GLenum ErrorCheckValue = glGetError();
+
+	VertexShaderFilledId = LoadShader("shader.Filledvs.glsl", GL_VERTEX_SHADER);	
+
+	FragmentShaderFilledId = LoadShader("shader.Filledps.glsl", GL_FRAGMENT_SHADER); 
+
+	ProgramFilledId = glCreateProgram();
+	glAttachShader(ProgramFilledId, VertexShaderFilledId);
+	glAttachShader(ProgramFilledId, FragmentShaderFilledId);
+
+	glLinkProgram(ProgramFilledId);
+	ErrorCheckValue = glGetError();
+	if (ErrorCheckValue != GL_NO_ERROR)
+	{
+		glGetProgramInfoLog(ProgramFilledId,1023,NULL,log);
+		fprintf(
+			stderr,
+			"ERROR: Could not destroy the VBO: %s \n",
+			log
+			);
+		
+		exit(-1);
+	}
+	//Program 2 part 2
+	/*glUseProgram(ProgramFilledId);
+
+	//ModelMatrixLocation = glGetUniformLocation(ProgramFilledId, "ModelMatrix");
+	//ViewMatrixLocation = glGetUniformLocation(ProgramFilledId, "ViewMatrix");
+	//ProjectionMatrixLocation = glGetUniformLocation(ProgramFilledId, "ProjectionMatrix");
+    // template KLM matrix with the dummy values
+	//CubicSpline tempSpline(0.0f, 0.0f, 0.33f, 0.25f, 0.66f, 0.75f, 1.0f, 1.0f);
+	//globalKlm = tempSpline.KLM;
+	//klmLocation = glGetUniformLocation(ProgramId, "klmMatrix");
+
+	ErrorCheckValue = glGetError();
+	if (ErrorCheckValue != GL_NO_ERROR)
+	{
+			glGetProgramInfoLog(ProgramFilledId,1023,NULL,log);
+		fprintf(
+			stderr,
+			"ERROR: Could not create the shaders: %s \n",
+			/*gluErrorString(ErrorCheckValue)*/
+			//log
+	//	);
+
+	//	exit(-1);
+	//}
+	//
 }
 
 void DestroyShaders(void)
@@ -780,11 +849,18 @@ void DestroyShaders(void)
 
 	glDetachShader(ProgramId, VertexShaderId);
 	glDetachShader(ProgramId, FragmentShaderId);
+	
+	glDetachShader(ProgramFilledId, VertexShaderFilledId);
+	glDetachShader(ProgramFilledId, FragmentShaderFilledId);
 
 	glDeleteShader(FragmentShaderId);
 	glDeleteShader(VertexShaderId);
 
+	glDeleteShader(FragmentShaderFilledId);
+	glDeleteShader(VertexShaderFilledId);
+
 	glDeleteProgram(ProgramId);
+	glDeleteProgram(ProgramFilledId);
 
 	ErrorCheckValue = glGetError();
 	if (ErrorCheckValue != GL_NO_ERROR)
