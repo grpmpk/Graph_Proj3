@@ -351,7 +351,7 @@ GLuint ModelMatrixLocation,
 	ViewMatrixLocationFilled,
 	ProjectionMatrixLocationFilled;
 
-GLuint DisplacementLocation;
+GLuint DisplacementLocation, DisplacementLocationFilled;
 
 void Initialize(int, char*[]);
 void ResizeFunction(int, int);
@@ -552,12 +552,16 @@ void RenderFunction(void)
 	glUniformMatrix4fv(ViewMatrixLocation, 1, GL_FALSE, &(ViewMatrix[0][0]));
 	glUniformMatrix4fv(ProjectionMatrixLocation, 1, GL_FALSE, &(ProjectionMatrix[0][0]));
 
+	// update displacement control
+    glUniform1i(DisplacementLocation, (displacement?1:0));
+
 	glBindVertexArray(VaoId);
 	glBindBuffer(GL_ARRAY_BUFFER, BufferId);
 
 	// Draw the triangle
 	// Starting from vertex 0; 6 vertices total -> 2 triangles
-    glDrawArrays(GL_TRIANGLES, 0, 24);
+    //glDrawArrays(GL_TRIANGLES, 0, 24);
+    glDrawArrays(GL_TRIANGLES, 0, 48); // 42 expected for O glyph
 
 	glBindVertexArray(0);
 	glUseProgram(0);
@@ -568,6 +572,9 @@ void RenderFunction(void)
 	glUniformMatrix4fv(ModelMatrixLocationFilled, 1, GL_FALSE, &(ModelMatrix[0][0]));
 	glUniformMatrix4fv(ViewMatrixLocationFilled, 1, GL_FALSE, &(ViewMatrix[0][0]));
 	glUniformMatrix4fv(ProjectionMatrixLocationFilled, 1, GL_FALSE, &(ProjectionMatrix[0][0]));
+	
+	// update displacement control
+    glUniform1i(DisplacementLocationFilled, (displacement?1:0));
 
 	glBindVertexArray(VaoFilledId);
 	glBindBuffer(GL_ARRAY_BUFFER, BufferFilledId);
@@ -619,52 +626,93 @@ void CreateVBO(void)
 		// - for UV, values are ALWAYS [0,0], [0.5, 0], and [1,1] RESPECTIVELY for 3 vertices (see Figure 25-2)
 		// - for KLM, values need to be calculated (on CPU and pass it in or GPU)
 
+		// Red
 		// Triangle #1:
-		// vertex 0
 		{
 			{ 0.8f, 0.0f, 0.0f, 1.0f }, // position
 			{ 1.0f, 1.0f, 1.0f, 1.0f }, // color
 			{ 0.0f, 0.0f, 0.0f },       // tex coords
 			{ 0 }  // isBlue
 		},
-		{ {  0.777686f, 0.289685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1		
-		{ {  0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+		{ {  0.777686f, 0.289685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } },
+		{ {  0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } },
 
 		// Triangle #2
-		{ {  0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
-		{ {  0.374315, 0.705685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1
-		{ {  0.0f, 0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+		{ {  0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } },
+		{ {  0.374315, 0.705685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } },
+		{ {  0.0f, 0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } },
 
 		// Triangle #3
-		{ {  0.0f, 0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0
-		{ {  -0.374315, 0.705685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1
-		{ {  -0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+		{ {  0.0f, 0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } },
+		{ {  -0.374315, 0.705685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, 
+		{ {  -0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } },
 
 		// Triangle #4:		
-		{ {  -0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0
-		{ {  -0.777686f, 0.289685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1		
-		{ {  -0.8f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+		{ {  -0.565685f, 0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } },
+		{ {  -0.777686f, 0.289685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } },		
+		{ {  -0.8f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } },
 
 		// Triangle #5:
-		{ {  -0.8f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0
-		{ {  -0.777686f, -0.289685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1		
-		{ {  -0.565685f, -0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+		{ {  -0.8f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } },
+		{ {  -0.777686f, -0.289685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } },	
+		{ {  -0.565685f, -0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } },
 
 		// Triangle #6:
-		{ {  -0.565685f, -0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 0
-		{ {  -0.374315, -0.705685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1
-		{ {  0.0f, -0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 2
+		{ {  -0.565685f, -0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } },
+		{ {  -0.374315, -0.705685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, 
+		{ {  0.0f, -0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } },
 
 		// Triangle #7
-		{ {  0.0f, -0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
-		{ {  0.245868, -0.813686, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1
-		{ {  0.443999, -0.72f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+		{ {  0.0f, -0.8f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } },
+		{ {  0.374315, -0.705685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, 
+		{ {  0.565685f, -0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } },
 				
+		// Triangle #8:		
+		{ {  0.565685f, -0.565685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } },
+		{ {  0.777686f, -0.289685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } },	
+		{ {  0.8f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } },
+
+		// Blue
+		// Triangle #1:
+		{ {  0.55f, 0.002315f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1 } },
+		{ {  0.508f, 0.2f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 1 } },
+		{ {  0.392f, 0.368f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 1 } },
+
+		// Triangle #2:
+		{ {  0.392f, 0.368f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1 } },
+		{ {  0.218315f, 0.489685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 1 } },
+		{ {  0.002315f, 0.562315f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 1 } },
+
+		// Triangle #3:
+		{ {  0.002315f, 0.562315f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1 } },
+		{ {  -0.218315f, 0.489685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 1 } },
+		{ {  -0.392f, 0.368f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 1 } },
+
+		// Triangle #4:
+		{ {  -0.392f, 0.368f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1 } },
+		{ {  -0.508f, 0.2f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 1 } },
+		{ {  -0.55f, 0.002315f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 1 } },
+
+		// Triangle #5:
+		{ {  -0.55f, 0.002315f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1 } },
+		{ {  -0.508f, -0.2f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 1 } },
+		{ {  -0.392f, -0.368f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 1 } },
+
+		// Triangle #6:
+		{ {  -0.392f, -0.368f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1 } },
+		{ {  -0.218315f, -0.489685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 1 } },
+		{ {  -0.002315f, -0.562315f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 1 } },
+
+		// Triangle #7:
+		{ {  -0.002315f, -0.562315f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1 } },
+		{ {  0.218315f, -0.489685f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 1 } },
+		{ {  0.392f, -0.368f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 1 } },
+
 		// Triangle #8:
-		
-		{ {  0.443999, -0.72f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 0 } }, // vertex 0
-		{ {  0.617685, -0.582315, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } }, // vertex 1		
-		{ {  0.75f, -0.368001, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } }, // vertex 2
+		{ {  0.392f, -0.368f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1 } },
+		{ {  0.508f, -0.2f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 1 } },
+		{ {  0.55f, 0.002315f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 1 } },
+
 
 	};
 
@@ -749,16 +797,16 @@ void CreateVBOFilled(void)
 		{
 			{ 0.0f, 0.0f, 0.0f, 1.0f }, // position
 			{ 1.0f, 1.0f, 1.0f, 1.0f }, // color
-			{ 0.0f, 0.0f, 0.0f },        // tex coords
-			{ 0}
+			{ 0.0f, 0.0f, 0.0f },       // tex coords
+			{ 0 }
 		},
-		{ {  1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, {0} }, // vertex 1		
-		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, {0} }, // vertex 2
+		{ {  1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 0 } },
+		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 0 } },
 		
 		// Triangle #2
-		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, {1} }, // vertex 0 (same position as previous triangle 1's vertex 2, but with tex [0,0]
-		{ {  2.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, {1} }, // vertex 1
-		{ {  2.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, {1} }, // vertex 2
+		{ {  1.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }, { 1 } },
+		{ {  2.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 0.5f, 0.0f, 0.0f }, { 1 } },
+		{ {  2.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 0.0f }, { 1 } },
 		
 	};
 
@@ -921,6 +969,9 @@ void CreateShaders(void)
 	ModelMatrixLocation = glGetUniformLocation(ProgramId, "ModelMatrix");
 	ViewMatrixLocation = glGetUniformLocation(ProgramId, "ViewMatrix");
 	ProjectionMatrixLocation = glGetUniformLocation(ProgramId, "ProjectionMatrix");
+
+    DisplacementLocation = glGetUniformLocation(ProgramId, "displacement");
+
     // template KLM matrix with the dummy values
 	//CubicSpline tempSpline(0.0f, 0.0f, 0.33f, 0.25f, 0.66f, 0.75f, 1.0f, 1.0f);
 	//globalKlm = tempSpline.KLM;
@@ -973,6 +1024,9 @@ void CreateShadersFilled(void)
 	ModelMatrixLocationFilled = glGetUniformLocation(ProgramFilledId, "ModelMatrix");
 	ViewMatrixLocationFilled = glGetUniformLocation(ProgramFilledId, "ViewMatrix");
 	ProjectionMatrixLocationFilled = glGetUniformLocation(ProgramFilledId, "ProjectionMatrix");
+
+	DisplacementLocationFilled = glGetUniformLocation(ProgramFilledId, "displacement");
+
     // template KLM matrix with the dummy values
 	//CubicSpline tempSpline(0.0f, 0.0f, 0.33f, 0.25f, 0.66f, 0.75f, 1.0f, 1.0f);
 	//globalKlm = tempSpline.KLM;

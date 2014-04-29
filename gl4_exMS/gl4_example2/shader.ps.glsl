@@ -6,6 +6,8 @@ flat in int isBp;
 
 out vec4 out_Color;
 
+uniform int displacement;
+
 float k;
 float l;
 float m;
@@ -34,14 +36,21 @@ void main(void)
 {
     vec4 theColor = vColor;
 
-	// optionally switch color here (comment, uncommment)
-	if (isBp == 0)
-	{
-	    theColor = vec4(1,0,0,0);
+	// switch color here based on displacement
+	if( displacement != 0)
+	{	
+	    if (isBp == 0)
+		{
+	        theColor = vec4(1,0,0,0);
+		}
+		else
+		{
+		    theColor = vec4(0,0,1,0);
+		}
 	}
 	else
 	{
-	    theColor = vec4(0,0,1,0);
+	    theColor = vColor;
 	}
 
 
